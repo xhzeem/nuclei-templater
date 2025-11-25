@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuclei Template Creator</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/autocomplete.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Left Panel: Form Editor -->
+        <div class="editor-panel">
+            <header class="app-header">
+                <h1>Nuclei Template Creator</h1>
+                <div class="page-navigation">
+                    <button id="btn-show-templates" class="btn primary small page-nav-btn active">Templates</button>
+                    <button id="btn-show-editor" class="btn secondary small page-nav-btn">Template Editor</button>
+                </div>
+                <div class="actions">
+                    <button id="btn-new" class="btn secondary small">New</button>
+                    <button id="btn-open" class="btn secondary small">Open</button>
+                    <button id="btn-download" class="btn primary small">Download YAML</button>
+                </div>
+            </header>
+
+            <!-- Templates Page -->
+            <div id="templates-page" class="page-content active">
+                <div class="scrollable-content">
+                    <div class="card">
+                        <div class="template-manager-header">
+                            <h2>Template Manager</h2>
+                            <div class="template-stats" id="template-stats">
+                                <!-- Stats will be populated by JS -->
+                            </div>
+                        </div>
+
+                        <div class="template-actions">
+                            <div class="template-actions-left">
+                                <div>
+                                    <button id="btn-create-template" class="btn primary small">New Template</button>
+                                    <button id="btn-import-templates" class="btn secondary small"
+                                        title="Import single or multiple .yaml files">Import Templates</button>
+                                    <button id="btn-download-all" class="btn secondary small">Download All</button>
+                                </div>
+                                <div class="import-help-text">Supports multiple files & drag-and-drop</div>
+                            </div>
+                            <div class="template-search">
+                                <input type="text" id="template-search" placeholder="Search templates..."
+                                    class="search-input">
+                            </div>
+                        </div>
+
+                        <div class="templates-list" id="templates-list">
+                            <!-- Template list will be populated by JS -->
+                        </div>
+
+                        <div id="drop-zone" class="drop-zone" style="display: none;">
+                            <div class="drop-zone-content">
+                                <div class="drop-zone-icon">📁</div>
+                                <div class="drop-zone-text">Drop .yaml files here to import templates</div>
+                                <div class="drop-zone-subtext">Multiple files supported</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Editor Page -->
+            <div id="editor-page" class="page-content">
+                <div class="scrollable-content">
+                    <!-- Current Template Info -->
+                    <div class="template-editor-header">
+                        <div class="current-template-info" id="current-template-info">
+                            <span class="template-name">No template selected</span>
+                            <div class="template-actions-header">
+                                <button id="btn-save-template" class="btn primary small" disabled>Save Changes</button>
+                                <button id="btn-discard-changes" class="btn danger small" disabled>Discard
+                                    Changes</button>
+                                <button id="btn-back-to-templates" class="btn secondary small">← Back to
+                                    Templates</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Template Info -->
+                    <div class="card">
+                        <h2>Template Information</h2>
+                        <div class="form-group">
+                            <label for="template-id">Template ID</label>
+                            <input type="text" id="template-id" data-path="id" placeholder="template-id">
+                        </div>
+                        <div class="form-group">
+                            <label for="info-name">Name</label>
+                            <input type="text" id="info-name" data-path="info.name" placeholder="Template Name">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="info-author">Author</label>
+                                <input type="text" id="info-author" data-path="info.author" placeholder="Author Name">
+                            </div>
+                            <div class="form-group">
+                                <label for="info-severity">Severity</label>
+                                <select id="info-severity" data-path="info.severity">
+                                    <!-- Populated by JS -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="info-description">Description</label>
+                            <textarea id="info-description" data-path="info.description" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="info-tags">Tags</label>
+                            <input type="text" id="info-tags" data-path="info.tags" placeholder="tag1, tag2">
+                        </div>
+                        <div class="form-group">
+                            <label for="info-reference">Reference (One per line)</label>
+                            <textarea id="info-reference" data-path="info.reference" rows="2"
+                                placeholder="https://example.com"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- HTTP Requests -->
+                    <div class="card">
+                        <div class="section-header">
+                            <h2>HTTP Requests</h2>
+                        </div>
+                        <div id="requests-container">
+                            <!-- Dynamic Requests will be injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: YAML Preview -->
+        <div class="gutter" id="resize-handle"></div>
+        <div class="preview-panel" id="preview-panel">
+            <header class="panel-header">
+                <h2>YAML Preview</h2>
+                <div class="panel-actions">
+                    <button id="btn-toggle-view" class="btn secondary small">Edit YAML</button>
+                    <button id="btn-copy" class="btn secondary small">Copy</button>
+                    <button id="btn-hide-yaml" class="btn secondary small" title="Hide Panel">×</button>
+                </div>
+            </header>
+            <div class="editor-container">
+                <textarea id="yaml-editor" spellcheck="false"></textarea>
+                <pre id="yaml-viewer" class="json-viewer"></pre>
+            </div>
+        </div>
+    </div>
+
+    <button id="btn-show-yaml" class="btn secondary small floating-toggle" style="display: none;">Show YAML</button>
+
+    <!-- New Template Modal -->
+    <div id="new-template-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-container">
+            <header class="modal-header">
+                <h2>Create New Template</h2>
+                <button class="btn-close-modal">×</button>
+            </header>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="new-template-name">Template Name</label>
+                    <input type="text" id="new-template-name" placeholder="e.g., CVE-2023-XXXX">
+                </div>
+                <div class="form-group">
+                    <label>Select Protocol</label>
+                    <div class="protocol-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-create-confirm" class="btn primary">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conflict Resolution Modal -->
+    <div id="conflict-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-container conflict-modal">
+            <header class="modal-header">
+                <h2>Template Conflict Detected</h2>
+            </header>
+            <div class="modal-body">
+                <div id="conflict-message" class="conflict-message"></div>
+                <div class="conflict-options">
+                    <div class="conflict-option">
+                        <input type="radio" id="conflict-override" name="conflict-action" value="override">
+                        <label for="conflict-override">
+                            <strong>Override existing template</strong>
+                            <div class="option-description">Replace the existing template with the imported one</div>
+                        </label>
+                    </div>
+                    <div class="conflict-option">
+                        <input type="radio" id="conflict-rename" name="conflict-action" value="rename" checked>
+                        <label for="conflict-rename">
+                            <strong>Keep both templates</strong>
+                            <div class="option-description">Import with a new name (e.g., "Template Name (1)")</div>
+                        </label>
+                    </div>
+                    <div class="conflict-option">
+                        <input type="radio" id="conflict-skip" name="conflict-action" value="skip">
+                        <label for="conflict-skip">
+                            <strong>Skip this template</strong>
+                            <div class="option-description">Don't import this template</div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-conflict-apply" class="btn primary">Apply</button>
+                <button id="btn-conflict-apply-all" class="btn secondary">Apply to All</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="js/schema.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/template-manager.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/autocomplete.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
