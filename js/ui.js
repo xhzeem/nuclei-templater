@@ -154,7 +154,7 @@ class UI {
         const info = this.app.currentTemplate.content.info;
 
         // Populate Info Fields
-        document.getElementById('template-id').value = info.id || '';
+        document.getElementById('template-id').value = this.app.currentTemplate.content.id || '';
         document.getElementById('info-name').value = info.name || '';
         document.getElementById('info-author').value = info.author || '';
         document.getElementById('info-description').value = info.description || '';
